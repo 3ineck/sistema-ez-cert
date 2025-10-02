@@ -1,0 +1,189 @@
+<%- include("partials/header"); -%> <%- include("utils/navbar"); -%>
+
+<body>
+  <div class="container">
+    <br />
+    <h1>SOLICITAR CORTESIA</h1>
+    <br />
+    <form
+      novalidate
+      class="needs-validation"
+      action="/admin/cortesia-parceiro/solicitar"
+      method="post"
+    >
+      <div class="row g-3">
+        <div class="col-md-5">
+          <div class="form-floating">
+            <select class="form-select" id="parceiro" name="parceiro" required>
+              <option selected disabled value>Selecione o parceiro</option>
+              <% parceiros.forEach(parceiro => { %>
+              <option value="<%= parceiro.id %>">
+                <%= parceiro.apelido %>
+              </option>
+              <% }) %>
+            </select>
+            <div class="invalid-feedback">
+              Selecione o parceiro que será concedida a cortesia.
+            </div>
+            <label for="parceiro">Parceiro</label>
+          </div>
+        </div>
+      </div>
+      <p></p>
+
+      <div class="row g-3">
+        <div class="col-md-5">
+          <div class="form-floating">
+            <select class="form-select" id="produto" name="produto" required>
+              <option selected disabled value>Selecione o produto</option>
+              <option value="e-CNPJ A1 Arquivo">e-CNPJ A1 Arquivo</option>
+              <option value="e-CPF A1 Arquivo">e-CPF A1 Arquivo</option>
+            </select>
+            <div class="invalid-feedback">
+              Selecione o produto que será concedido ao parceiro.
+            </div>
+            <label for="produto">Produto</label>
+          </div>
+        </div>
+      </div>
+      <p></p>
+
+      <div class="row g-3">
+        <div class="col-md-5">
+          <div class="form-floating">
+            <select class="form-select" name="validade" id="validade" required>
+              <option selected disabled value>Selecione a validade</option>
+              <option value="12" selected>12 meses</option>
+            </select>
+            <div class="invalid-feedback">
+              Selecione a validade do certificado que será concedido como
+              cortesia.
+            </div>
+            <div class="invalid-feedback">
+              Selecione a validade do produto a ser cadastrado.
+            </div>
+            <label for="validade">Validade</label>
+          </div>
+        </div>
+      </div>
+      <p></p>
+
+      <div class="row g-3">
+        <div class="col-md-5">
+          <div class="form-floating">
+            <input
+              class="form-control"
+              id="cliente"
+              name="cliente"
+              placeholder="Cliente"
+              type="text"
+              onfocus="javascript: retirarFormatacao(this);"
+              onblur="javascript: formatarCampo(this);"
+              maxlength="14"
+              required
+            />
+            <div class="invalid-feedback">
+              Escreva o número do documento (CNPJ/CPF) do titular do
+              certificado.
+            </div>
+            <label for="cliente">CPF/CNPJ</label>
+          </div>
+        </div>
+      </div>
+      <p></p>
+
+      <div class="row g-3">
+        <div class="col-md-5">
+          <div class="form-floating">
+            <textarea
+              class="form-control"
+              id="justificativa"
+              name="justificativa"
+              placeholder="Justificativa"
+              style="height: 200px"
+              required
+            ></textarea>
+            <div class="invalid-feedback">
+              Escreva o motivo ou a finalidade para o certificado de cortesia.
+            </div>
+            <label for="link">Justificativa</label>
+          </div>
+        </div>
+      </div>
+      <p></p>
+
+      <button type="submit" class="btn btn-primary btn-lg">Solicitar</button>
+    </form>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    const mascaraMoeda = (event) => {
+      const onlyDigits = event.target.value
+        .split("")
+        .filter((s) => /\d/.test(s))
+        .join("")
+        .padStart(3, "0");
+      const digitsFloat = onlyDigits.slice(0, -2) + "." + onlyDigits.slice(-2);
+      event.target.value = maskCurrency(digitsFloat);
+    };
+
+    const maskCurrency = (valor, locale = "pt-BR", currency = "BRL") => {
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency,
+      }).format(valor);
+    };
+
+    //TOOLTIP
+    $(document).ready(function () {
+      $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+    });
+
+    function formatarCampo(campoTexto) {
+      if (campoTexto.value.length <= 11) {
+        campoTexto.value = mascaraCpf(campoTexto.value);
+      } else {
+        campoTexto.value = mascaraCnpj(campoTexto.value);
+      }
+    }
+    function retirarFormatacao(campoTexto) {
+      campoTexto.value = campoTexto.value.replace(/(\.|\/|\-)/g, "");
+    }
+    function mascaraCpf(valor) {
+      return valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/g, "\$1.\$2.\$3\-\$4");
+    }
+    function mascaraCnpj(valor) {
+      return valor.replace(
+        /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g,
+        "\$1.\$2.\$3\/\$4\-\$5"
+      );
+    }
+
+    //VALIDATION
+    (() => {
+      "use strict";
+
+      // Fetch all the forms we want to apply custom Bootstrap validation styles to
+      const forms = document.querySelectorAll(".needs-validation");
+
+      // Loop over them and prevent submission
+      Array.from(forms).forEach((form) => {
+        form.addEventListener(
+          "submit",
+          (event) => {
+            if (!form.checkValidity()) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+
+            form.classList.add("was-validated");
+          },
+          false
+        );
+      });
+    })();
+  </script>
+</body>
+<br />
+<%- include("partials/footer"); -%>

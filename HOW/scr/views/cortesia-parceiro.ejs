@@ -1,0 +1,173 @@
+<%- include("partials/header"); -%> <%- include("utils/navbar"); -%>
+
+<body>
+  <div class="container">
+    <br />
+    <h1>CORTESIA PARA PARCEIROS</h1>
+    <br />
+
+    <!-- BOTÕES -->
+    <a
+      class="btn btn-primary"
+      href="/admin/cortesia-parceiro"
+      role="button"
+      data-toggle="tooltip"
+      title="Atualizar"
+    >
+      <i class="bi bi-arrow-clockwise"></i>
+    </a>
+
+    <a
+      class="btn btn-primary"
+      href="/admin/cortesia-parceiro/solicitar"
+      role="button"
+      data-toggle="tooltip"
+      title="Solicitar cortesia"
+    >
+      <i class="bi bi-file-earmark-plus"></i>
+    </a>
+
+    <!-- TABELA -->
+    <form action="/cortesia-confirmacao" id="formFaturas" method="post">
+      <table
+        id="cortesiaTabela"
+        class="table table-hover table-bordered align-middle nowrap"
+        style="width: 100%"
+      >
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Parceiro</th>
+            <th>Modelo</th>
+            <th>Validade</th>
+            <th>Solicitação</th>
+            <th>Atualização</th>
+            <th>Cliente</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% tickets.forEach((ticket,i) => { %>
+          <tr
+            class="<%= ticket.foi_liberado == false ? 'cancelado' : (ticket.foi_liberado == null ? 'espera' : 'liberado') %>"
+          >
+            <td class="text-center btn-info" id="ticket<%= i %>">
+              <%= ticket.foi_liberado == true ? ticket.ticket :
+              (ticket.foi_liberado == null ? 'Aguardar Liberação' : 'Recusado')
+              %>
+            </td>
+            <td class="text-center btn-info"><%= ticket.apelido %></td>
+            <td class="text-center btn-info"><%= ticket.modelo %></td>
+            <td class="text-center btn-info"><%= ticket.validade %></td>
+            <td class="text-center btn-info">
+              <%= ticket.data_solicitacao ? (ticket.data_solicitacao.getDate() <
+              10 ? "0" + ticket.data_solicitacao.getDate() :
+              ticket.data_solicitacao.getDate() ) :
+              ""%>/<%=ticket.data_solicitacao ?
+              ((ticket.data_solicitacao.getMonth()+1) < 10 ? "0" +
+              (ticket.data_solicitacao.getMonth()+1) :
+              (ticket.data_solicitacao.getMonth()+1)) : ""
+              %>/<%=ticket.data_solicitacao ?
+              ticket.data_solicitacao.getFullYear() : ""%>
+            </td>
+            <td class="text-center btn-info">
+              <%= ticket.data_liberacao ? (ticket.data_liberacao.getDate() < 10
+              ? "0" + ticket.data_liberacao.getDate() :
+              ticket.data_liberacao.getDate() ) : ""%>/<%=ticket.data_liberacao
+              ? ((ticket.data_liberacao.getMonth()+1) < 10 ? "0" +
+              (ticket.data_liberacao.getMonth()+1) :
+              (ticket.data_liberacao.getMonth()+1)) : ""
+              %>/<%=ticket.data_liberacao ? ticket.data_liberacao.getFullYear()
+              : ""%>
+            </td>
+            <td class="text-center btn-info"><%= ticket.cliente %></td>
+            <td class="text-center normal">
+              <% if (ticket.foi_liberado == true) { %>
+              <button
+                class="btn btn-primary btn-sm normalOpa"
+                type="button"
+                id="button-documento<%= i %>"
+                data-toggle="tooltip"
+                title="Copiar ticket"
+                value="<%= i %>"
+                onclick="copiarTexto(this)"
+              >
+                <i id="<%= i %>CopyIcon" class="bi bi-clipboard"></i>
+              </button>
+              <% } %>
+              <button
+                class="btn btn-primary btn-sm normalOpa"
+                data-toggle="tooltip"
+                title="Aprovar"
+                name="aprovar"
+                value="<%= ticket.id %>"
+                onclick="return confirm('Você deseja aprovar a cortesia para o parceiro <%= ticket.apelido %>?');"
+              >
+                <i class="bi bi-check2-square"></i>
+              </button>
+              <button
+                class="btn btn-primary btn-sm normalOpa"
+                data-toggle="tooltip"
+                title="Reprovar"
+                name="reprovar"
+                value="<%= ticket.id %>"
+                onclick="return confirm('Você deseja reprovar a cortesia para o parceiro <%= ticket.apelido %>?');"
+              >
+                <i class="bi bi-x-circle"></i>
+              </button>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </form>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    function copiarTexto(elem) {
+      let tickets = <%- JSON.stringify(tickets) %>;
+      let idInput = elem.id.slice(16);
+      let ticketCopiado = "";
+
+      ticketCopiado = tickets[idInput].ticket;
+
+      // Copiar
+      navigator.clipboard.writeText(ticketCopiado);
+
+      //Troca icone
+      var icon = document.getElementById(idInput + "CopyIcon");
+      icon.classList.remove("bi-clipboard");
+      icon.classList.add("bi-clipboard-check");
+
+      setTimeout(function () {
+        var icon = document.getElementById(idInput + "CopyIcon");
+        icon.classList.remove("bi-clipboard-check");
+        icon.classList.add("bi-clipboard");
+      }, 1200);
+
+      var tt = bootstrap.Tooltip.getInstance("#" + elem.id);
+      tt.setContent({ ".tooltip-inner": "Copiado!" });
+    }
+
+    $(document).ready(function () {
+      $("#cortesiaTabela").DataTable({
+        responsive: true,
+        language: {
+          url: "//cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json",
+        },
+        lengthMenu: [14],
+        lengthChange: false,
+        ordering: false,
+        searching: false,
+      });
+    });
+
+    //TOOLTIP
+    $(document).ready(function () {
+      $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+    });
+  </script>
+</body>
+<br />
+<%- include("partials/footer"); -%>
